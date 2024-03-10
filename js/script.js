@@ -1,58 +1,83 @@
 
 
-const container=document.getElementById('listaUsuarios')
+const containerElDOM = document.getElementById('listaUsuarios')
 
-const edad=Math.floor(Math.random()*70)
+fetch('https://jsonplaceholder.typicode.com/users')
+  .then((res) => res.json())
+  .then((usersDB) => {
+    const users = usersDB.map((user) => ({
+      name: user.name,
+      username: user.username,
+      img: `./assets/img/${user.id}.jpeg`,
+      phone: user.phone,
+      email: user.email,
+      company: user.company.name,
+      address: {
+        street: user.address.street,
+        suite: user.address.suite,
+        city: user.address.city,
+      },
+      age: Math.floor(Math.random() * 40) + 18,
+    }))
 
+    console.log(users)
 
+    users.forEach((user) => {
+      const li = document.createElement('li')
+      li.className = 'user-card'
 
-fetch(`https://jsonplaceholder.typicode.com/users`)
-.then(res=>{
-    return res.json()
-})
-    .then((data) => {
-        
-        renderPersons(data)
-        
+      const div = document.createElement('div')
+      div.className = 'user-info'
+
+      const ulInfo = document.createElement('ul')
+
+      const userInfo = [
+        { label: 'Nombre:', value: user.name },
+        { label: 'Edad:', value: user.age },
+        { label: 'Username:', value: user.username },
+        { label: 'Teléfono:', value: user.phone },
+        { label: 'Email:', value: user.email },
+      ]
+
+      userInfo.forEach((info) => {
+        const li = document.createElement('li')
+        const b = document.createElement('b')
+        b.textContent = info.label
+
+        li.append(b, info.value)
+
+        ulInfo.appendChild(li)
+      })
+
+      const img = document.createElement('img')
+      img.src = user.img
+      img.alt = `photo ${user.name}`
+
+      const ulDetails = document.createElement('ul')
+
+      const { street, suite, city } = user.address
+
+      const userDetails = [
+        { label: 'Compañía:', value: user.company },
+        {
+          label: 'Dirección:',
+          value: `${street}, ${suite}, ${city}`,
+        },
+      ]
+
+      userDetails.forEach((detail) => {
+        const li = document.createElement('li')
+        const b = document.createElement('b')
+        b.textContent = detail.label
+
+        li.append(b, detail.value)
+
+        ulDetails.appendChild(li)
+      })
+
+      div.append(ulInfo, img)
+      li.append(div, ulDetails)
+
+      containerElDOM.appendChild(li)
     })
-    .catch((err) => {
-        alert('Error al obtener recursos del servidor')
-    })
-
-
-
-
-
-    function renderPersons(person){
-        container.innerHTML = ''
-    
-        person.forEach((pers,index) => {
-            
-          container.innerHTML += `
-          <article >
-            <img id=${index+1} src='assets/img/${index+1}.jpeg' alt=${pers.name} />
-            <ul class="person__details">
-              <li >
-                <p><b>Name:</b> ${pers.name}</p>
-              </li>
-              <li >
-                <p><b>Phone:</b> ${pers.phone}</p>
-              </li>
-              <li >
-              <p><b>email:</b> ${pers.email}</p>
-              </li>
-              <li >
-              <p><b>company:</b> ${pers.company.name}</p>
-              </li>
-              <li >
-              <p><b>username:</b> ${pers.username}</p>
-              </li>
-              <li >
-              <p><b>age:</b> ${edad}</p>
-              </li>
-            </ul>
-
-          </article>
-        `
-        })
-    }
+  })
